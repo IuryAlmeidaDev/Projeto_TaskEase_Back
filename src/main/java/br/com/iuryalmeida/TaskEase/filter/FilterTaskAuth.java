@@ -20,6 +20,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
     @Autowired
     private IUserRepository userRepository;
 
+    @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(@SuppressWarnings("null") HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
