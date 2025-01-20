@@ -26,11 +26,8 @@ public class TaskController {
     @Autowired
     private ITaskRepository taskRepository;
 
-    // Método para validar as datas da tarefa
     private boolean isInvalidDates(TaskModel taskModel) {
         var currentDateTime = LocalDateTime.now();
-        
-        // Verifica se o endAt é antes de agora ou se startAt é depois de endAt
         return currentDateTime.isAfter(taskModel.getEndAt()) || 
                (taskModel.getStartAt() != null && taskModel.getStartAt().isAfter(taskModel.getEndAt()));
     }
@@ -40,18 +37,13 @@ public class TaskController {
         var idUser = request.getAttribute("idUser");
         taskModel.setIdUser((UUID) idUser);
         
-        // Verificar se as datas são válidas
         if (isInvalidDates(taskModel)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("A data de término (endAt) deve ser maior que a data atual e a data de início (startAt) deve ser antes da data de término (endAt).");
         }
 
-        // Definir status padrão ao criar
         taskModel.setStatus(TaskStatus.pendente);
-
-        // Salvar a tarefa no repositório
         var task = this.taskRepository.save(taskModel);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(task);
     }
 
@@ -60,6 +52,21 @@ public class TaskController {
         var idUser = (UUID) request.getAttribute("idUser");
         List<TaskModel> tasks = this.taskRepository.findByIdUser(idUser);
         return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getTasksByStatus(@PathVariable TaskStatus status, HttpServletRequest request) {
+    var idUser = (UUID) request.getAttribute("idUser");
+    List<TaskModel> tasks = this.taskRepository.findByStatusAndIdUser(status, idUser);
+    return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/due/{dueDate}")
+    public ResponseEntity<?> getTasksByDueDate(@PathVariable String dueDate, HttpServletRequest request) {
+    var idUser = (UUID) request.getAttribute("idUser");
+    LocalDateTime dueDateTime = LocalDateTime.parse(dueDate);
+    List<TaskModel> tasks = this.taskRepository.findByEndAtAndIdUser(dueDateTime, idUser);
+    return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{id}")
@@ -82,21 +89,19 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
         var task = this.taskRepository.findById(id).orElse(null);
-
+    
         if (task == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tarefa não encontrada");
         }
-
+    
         var idUser = request.getAttribute("idUser");
-
+    
         if (!task.getIdUser().equals(idUser)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Usuário não tem permissão para alterar essa tarefa");
         }
-
-        // Atualizar as propriedades não nulas
+    
         Utils.copyNonNullProperties(taskModel, task);
-
         var taskUpdated = this.taskRepository.save(task);
         return ResponseEntity.ok().body(taskUpdated);
     }
@@ -117,7 +122,7 @@ public class TaskController {
             }
 
             this.taskRepository.delete(task);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // Retorna 204 (No Content)
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao excluir a tarefa: " + e.getMessage());
