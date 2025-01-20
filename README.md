@@ -77,7 +77,7 @@ Você pode usar o Postman para testar as rotas da aplicação. Siga os passos ab
 ## Testes
 Para executar os testes, use o comando:
 ```
-./mvnw test
+mvnw test
 ```
 
 ## Contribuição
