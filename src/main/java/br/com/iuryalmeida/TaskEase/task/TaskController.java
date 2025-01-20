@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.iuryalmeida.TaskEase.Utils.Utils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
+@Tag(name = "Task Controller", description = "APIs para gerenciamento de tarefas")
 public class TaskController {
 
     @Autowired
@@ -34,6 +37,7 @@ public class TaskController {
     }
 
     @PostMapping("/")
+    @Operation(summary = "Cria uma nova tarefa", description = "Cria uma nova tarefa para o usuário autenticado")
     public ResponseEntity<?> create(@Valid @RequestBody TaskModel taskModel, HttpServletRequest request) {
         var idUser = request.getAttribute("idUser");
         taskModel.setIdUser((UUID) idUser);
@@ -49,6 +53,7 @@ public class TaskController {
     }
 
     @GetMapping("/")
+    @Operation(summary = "Obtém todas as tarefas", description = "Obtém todas as tarefas do usuário autenticado")
     public ResponseEntity<?> getTasks(HttpServletRequest request) {
         var idUser = (UUID) request.getAttribute("idUser");
         List<TaskModel> tasks = this.taskRepository.findByIdUser(idUser);
@@ -56,6 +61,7 @@ public class TaskController {
     }
 
     @GetMapping("/status/{status}")
+    @Operation(summary = "Obtém tarefas por status", description = "Obtém todas as tarefas do usuário autenticado com o status especificado")
     public ResponseEntity<?> getTasksByStatus(@PathVariable TaskStatus status, HttpServletRequest request) {
         var idUser = (UUID) request.getAttribute("idUser");
         List<TaskModel> tasks = this.taskRepository.findByStatusAndIdUser(status, idUser);
@@ -63,6 +69,7 @@ public class TaskController {
     }
 
     @GetMapping("/due/{dueDate}")
+    @Operation(summary = "Obtém tarefas por data de vencimento", description = "Obtém todas as tarefas do usuário autenticado com a data de vencimento especificada")
     public ResponseEntity<?> getTasksByDueDate(@PathVariable String dueDate, HttpServletRequest request) {
         var idUser = (UUID) request.getAttribute("idUser");
         LocalDateTime dueDateTime = LocalDateTime.parse(dueDate);
@@ -71,6 +78,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Obtém tarefa por ID", description = "Obtém a tarefa do usuário autenticado com o ID especificado")
     public ResponseEntity<?> getTaskById(@PathVariable UUID id, HttpServletRequest request) {
         var task = this.taskRepository.findById(id).orElse(null);
 
@@ -88,6 +96,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza uma tarefa", description = "Atualiza a tarefa do usuário autenticado com o ID especificado")
     public ResponseEntity<?> update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
         var task = this.taskRepository.findById(id).orElse(null);
     
@@ -108,6 +117,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Exclui uma tarefa", description = "Exclui a tarefa do usuário autenticado com o ID especificado")
     public ResponseEntity<?> delete(@PathVariable UUID id, HttpServletRequest request) {
         try {
             var task = this.taskRepository.findById(id).orElse(null);
