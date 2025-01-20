@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -16,7 +17,7 @@ public class UserController {
     private IUserRepository userRepository;
 
     @PostMapping("/")
-    public UserModel create(@RequestBody UserModel userModel) {
+    public UserModel create(@Valid @RequestBody UserModel userModel) {
         var user = this.userRepository.findByUsername(userModel.getUsername());
 
         if (user != null) {

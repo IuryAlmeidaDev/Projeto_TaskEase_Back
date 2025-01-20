@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.iuryalmeida.TaskEase.Utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
@@ -33,7 +34,7 @@ public class TaskController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
+    public ResponseEntity<?> create(@Valid @RequestBody TaskModel taskModel, HttpServletRequest request) {
         var idUser = request.getAttribute("idUser");
         taskModel.setIdUser((UUID) idUser);
         
@@ -56,17 +57,17 @@ public class TaskController {
 
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getTasksByStatus(@PathVariable TaskStatus status, HttpServletRequest request) {
-    var idUser = (UUID) request.getAttribute("idUser");
-    List<TaskModel> tasks = this.taskRepository.findByStatusAndIdUser(status, idUser);
-    return ResponseEntity.ok(tasks);
+        var idUser = (UUID) request.getAttribute("idUser");
+        List<TaskModel> tasks = this.taskRepository.findByStatusAndIdUser(status, idUser);
+        return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/due/{dueDate}")
     public ResponseEntity<?> getTasksByDueDate(@PathVariable String dueDate, HttpServletRequest request) {
-    var idUser = (UUID) request.getAttribute("idUser");
-    LocalDateTime dueDateTime = LocalDateTime.parse(dueDate);
-    List<TaskModel> tasks = this.taskRepository.findByEndAtAndIdUser(dueDateTime, idUser);
-    return ResponseEntity.ok(tasks);
+        var idUser = (UUID) request.getAttribute("idUser");
+        LocalDateTime dueDateTime = LocalDateTime.parse(dueDate);
+        List<TaskModel> tasks = this.taskRepository.findByEndAtAndIdUser(dueDateTime, idUser);
+        return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{id}")
